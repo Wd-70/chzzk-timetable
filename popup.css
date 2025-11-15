@@ -1,0 +1,142 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Noto Sans KR", sans-serif;
+  background-color: #000;
+  color: #e0e0e0;
+}
+
+.container {
+  width: 360px;
+  min-height: 400px;
+  padding: 16px;
+  background-color: #0a0a0a;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+h1 {
+  font-size: 20px;
+  color: #03c75a; /* 네이버/치지직 브랜드 색상 */
+  margin-bottom: 16px;
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #222;
+}
+
+#channelInfo {
+  margin-bottom: 16px;
+  padding: 8px;
+  background-color: #1a1a1a;
+  border-radius: 4px;
+}
+
+#channelInfo p {
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+#timetableContainer {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+#timetableLoading {
+  padding: 20px;
+  color: #999;
+}
+
+#timetableNotFound {
+  padding: 16px;
+}
+
+#timetableNotFound p {
+  margin-bottom: 8px;
+}
+
+#timetableUrlInput {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+button {
+  padding: 8px 12px;
+  background-color: #03c75a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #02b050;
+}
+
+#reportWrongTimetable {
+  background-color: #f44336;
+  font-size: 12px;
+  padding: 4px 8px;
+  margin-top: 8px;
+}
+
+#reportWrongTimetable:hover {
+  background-color: #d32f2f;
+}
+
+#timetableImage {
+  max-width: 100%;
+  max-height: 300px;
+  border: 1px solid #333;
+  margin-bottom: 8px;
+}
+
+.timetableSource {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
+}
+
+.options {
+  margin: 16px 0;
+  padding: 8px;
+  background-color: #1a1a1a;
+  border-radius: 4px;
+}
+
+.options label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.options input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.footer {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid #222;
+}
+
+.footer a {
+  color: #03c75a;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}

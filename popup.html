@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>치지직 시간표</title>
+    <link rel="stylesheet" href="popup.css" />
+    <style>
+      /* 추가 스타일 */
+      .loading {
+        text-align: center;
+        padding: 40px 20px;
+        color: #999;
+      }
+
+      .loading-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+
+      .week-info {
+        background: #1a1a1a;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 14px;
+        color: #e0e0e0;
+      }
+
+      .week-range {
+        flex: 1;
+        text-align: center;
+      }
+
+      .week-nav-btn {
+        background: #2a2a2a;
+        border: 1px solid #444;
+        border-radius: 4px;
+        padding: 4px 10px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+        min-width: 32px;
+        color: #e0e0e0;
+      }
+
+      .week-nav-btn:hover {
+        background: #3a3a3a;
+        border-color: #666;
+      }
+
+      .week-nav-btn:disabled {
+        background: #1a1a1a;
+        color: #555;
+        cursor: not-allowed;
+        border-color: #333;
+      }
+
+      .timetable-main {
+        position: relative;
+        margin: 15px 0;
+      }
+
+      .timetable-image {
+        width: 100%;
+        max-width: 360px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+      }
+
+      .vote-container {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin: 15px 0;
+        padding: 10px;
+        background: #1a1a1a;
+        border-radius: 8px;
+      }
+
+      .vote-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 10px 20px;
+        border: 2px solid #333;
+        background: #2a2a2a;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #e0e0e0;
+      }
+
+      .vote-btn:hover {
+        background: #3a3a3a;
+        border-color: #444;
+      }
+
+      .vote-btn.active-like {
+        border-color: #4CAF50;
+        background: #1a3a1a;
+      }
+
+      .vote-btn.active-dislike {
+        border-color: #f44336;
+        background: #3a1a1a;
+      }
+
+      .vote-icon {
+        font-size: 24px;
+      }
+
+      .vote-count {
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .timetable-thumbnails {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 10px 0;
+        margin: 15px 0;
+      }
+
+      .thumbnail {
+        flex-shrink: 0;
+        width: 100px;
+        height: 100px;
+        border-radius: 5px;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.2s;
+        object-fit: cover;
+      }
+
+      .thumbnail:hover {
+        border-color: #00bcd4;
+      }
+
+      .thumbnail.active {
+        border-color: #00bcd4;
+        box-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+      }
+
+      .thumbnail-container {
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      .thumbnail-score {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+      }
+
+      .upload-section {
+        margin: 20px 0;
+        padding: 15px;
+        background: #1a1a1a;
+        border-radius: 8px;
+      }
+
+      .upload-section h3 {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+        color: #e0e0e0;
+      }
+
+      .upload-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #333;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        background: #2a2a2a;
+        color: #e0e0e0;
+      }
+
+      .upload-btn {
+        width: 100%;
+        padding: 10px;
+        background: #00bcd4;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .upload-btn:hover {
+        background: #0097a7;
+      }
+
+      .upload-btn:disabled {
+        background: #555;
+        cursor: not-allowed;
+      }
+
+      .info-text {
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+      }
+
+      .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+
+      .uploader-info {
+        font-size: 12px;
+        color: #999;
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .report-btn,
+      .delete-btn {
+        padding: 5px 15px;
+        background: transparent;
+        border: 1px solid #444;
+        border-radius: 4px;
+        color: #999;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+      }
+
+      .report-btn:hover {
+        background: #2a2a2a;
+        border-color: #ff9800;
+        color: #ff9800;
+      }
+
+      .delete-btn {
+        border-color: #f44336;
+        color: #f44336;
+      }
+
+      .delete-btn:hover {
+        background: #3a1a1a;
+        border-color: #ff5555;
+      }
+
+      /* 이미지 클릭 가능 표시 */
+      .timetable-image {
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      .timetable-image:hover {
+        opacity: 0.9;
+      }
+
+      .thumbnail {
+        cursor: pointer;
+      }
+
+      /* Input placeholder */
+      .upload-input::placeholder {
+        color: #666;
+      }
+
+      /* Buy me a coffee 버튼 */
+      .bmc-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: #FFDD00;
+        color: #000000 !important;
+        border: 2px solid #000000;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        transition: all 0.2s;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+
+      .bmc-button span {
+        color: #000000;
+      }
+
+      .bmc-button:hover {
+        background: #FFED4E;
+        color: #000000 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 221, 0, 0.3);
+      }
+
+      .bmc-button:active {
+        transform: translateY(0);
+      }
+
+      .footer-links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>치지직 시간표</h1>
+
+      <div id="channelInfo">
+        <p>채널: <span id="channelName">로딩 중...</span></p>
+        <p style="font-size: 12px; color: #999;">
+          ID: <span id="channelId">...</span>
+        </p>
+      </div>
+
+      <div class="week-info">
+        <button id="prevWeekBtn" class="week-nav-btn" title="이전 주">◀</button>
+        <span class="week-range">📅 <span id="weekRange">로딩 중...</span></span>
+        <button id="nextWeekBtn" class="week-nav-btn" title="다음 주">▶</button>
+      </div>
+
+      <!-- 로딩 상태 -->
+      <div id="loadingState" class="loading">
+        <div class="loading-icon">⏳</div>
+        <p>시간표를 불러오는 중...</p>
+      </div>
+
+      <!-- 시간표 표시 영역 -->
+      <div id="timetableView" style="display: none;">
+        <!-- 메인 시간표 -->
+        <div class="timetable-main">
+          <img id="mainTimetable" class="timetable-image" src="" alt="시간표" />
+        </div>
+
+        <!-- 좋아요/싫어요 -->
+        <div class="vote-container">
+          <button id="likeBtn" class="vote-btn">
+            <span class="vote-icon">👍</span>
+            <span class="vote-count" id="likeCount">0</span>
+          </button>
+          <button id="dislikeBtn" class="vote-btn">
+            <span class="vote-icon">👎</span>
+            <span class="vote-count" id="dislikeCount">0</span>
+          </button>
+        </div>
+
+        <div class="uploader-info">
+          <span id="uploaderInfo">업로더: 익명</span> •
+          <span id="uploadTime">방금 전</span>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button id="deleteBtn" class="delete-btn" style="display: none;">🗑️ 내가 등록한 시간표 삭제</button>
+          <button id="reportBtn" class="report-btn">🚨 잘못된 시간표 신고</button>
+        </div>
+
+        <!-- 다른 시간표 (썸네일) -->
+        <div id="thumbnailsSection" style="display: none;">
+          <h3 style="font-size: 14px; margin: 15px 0 5px 0; color: #e0e0e0;">
+            다른 시간표 (<span id="thumbnailCount">0</span>개)
+          </h3>
+          <div id="thumbnails" class="timetable-thumbnails"></div>
+        </div>
+      </div>
+
+      <!-- 빈 상태 -->
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">📋</div>
+        <p>이번 주 시간표가 없습니다.</p>
+        <p style="font-size: 12px; color: #999;">
+          아래에서 시간표를 등록해주세요!
+        </p>
+      </div>
+
+      <!-- 시간표 등록 -->
+      <div class="upload-section">
+        <h3>➕ 시간표 등록하기</h3>
+        <input
+          type="text"
+          id="imageUrlInput"
+          class="upload-input"
+          placeholder="시간표 이미지 URL (https://...)"
+        />
+        <button id="uploadBtn" class="upload-btn">등록하기</button>
+        <p class="info-text">
+          ℹ️ 누구나 시간표를 등록할 수 있습니다. 이미지 URL을 입력해주세요.
+        </p>
+      </div>
+
+      <!-- 푸터 -->
+      <div class="footer" style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #222;">
+        <div class="footer-links">
+          <p style="font-size: 12px; color: #999; text-align: center; margin: 0;">
+            <a href="#" id="backupCodeLink" style="color: #00bcd4;">백업 코드 보기</a>
+          </p>
+          <a href="https://buymeacoffee.com/wd70" target="_blank" class="bmc-button">
+            <span>☕</span>
+            <span>Buy me a coffee</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firebase SDK (순서 중요!) -->
+    <script src="firebase-sdk/firebase-app-compat.js"></script>
+    <script src="firebase-sdk/firebase-auth-compat.js"></script>
+    <script src="firebase-sdk/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase 설정 및 서비스 -->
+    <script src="firebase-config.js"></script>
+    <script src="utils.js"></script>
+    <script src="firebase-service.js"></script>
+
+    <!-- 앱 로직 -->
+    <script src="popup.js"></script>
+  </body>
+</html>

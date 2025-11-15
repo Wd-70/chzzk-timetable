@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>치지직 시간표</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>치지직 시간표</h1>
+      <div id="channelInfo">
+        <p>채널: <span id="channelName">로딩 중...</span></p>
+        <p>채널 ID: <span id="channelId">로딩 중...</span></p>
+      </div>
+
+      <div id="timetableContainer">
+        <div id="timetableLoading">시간표를 불러오는 중...</div>
+        <div id="timetableNotFound" style="display: none">
+          <p>이 채널의 시간표를 찾을 수 없습니다.</p>
+          <p>시간표 이미지 URL을 알고 계신가요?</p>
+          <input
+            type="text"
+            id="timetableUrlInput"
+            placeholder="시간표 이미지 URL 입력"
+          />
+          <button id="submitTimetableUrl">제출하기</button>
+        </div>
+        <div id="timetableFound" style="display: none">
+          <img id="timetableImage" src="" alt="방송 시간표" />
+          <div class="timetableSource">
+            <p>출처: <span id="timetableSourceName">제보자</span></p>
+            <button id="reportWrongTimetable">잘못된 시간표 신고</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="options">
+        <label>
+          <input type="checkbox" id="showButtonOnPage" /> 방송 페이지에 시간표
+          버튼 표시
+        </label>
+      </div>
+
+      <div class="footer">
+        <p>
+          방송인도 직접 시간표를 등록할 수 있습니다.
+          <a href="#" id="broadcasterLink">자세히 알아보기</a>
+        </p>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
