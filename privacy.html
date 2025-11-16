@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개인정보 처리방침 - 치지직 시간표</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #00bcd4;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #00bcd4;
+            font-size: 24px;
+        }
+
+        h3 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .meta {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 30px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .lang-toggle {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .lang-toggle button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: 2px solid #00bcd4;
+            background: white;
+            color: #00bcd4;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .lang-toggle button.active {
+            background: #00bcd4;
+            color: white;
+        }
+
+        .lang-toggle button:hover {
+            background: #00bcd4;
+            color: white;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        a {
+            color: #00bcd4;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background: #fff9c4;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>개인정보 처리방침</h1>
+        <h1 style="font-size: 28px;">Privacy Policy</h1>
+
+        <div class="meta">
+            <strong>최종 수정일 / Last Updated:</strong> 2025년 3월 16일 / March 16, 2025<br>
+            <strong>버전 / Version:</strong> 1.0.0
+        </div>
+
+        <div class="lang-toggle">
+            <button onclick="showLang('ko')" id="btn-ko" class="active">한국어</button>
+            <button onclick="showLang('en')" id="btn-en">English</button>
+        </div>
+
+        <!-- 한국어 버전 -->
+        <div id="lang-ko" class="section active">
+            <h2>1. 수집하는 정보</h2>
+            <p><strong>치지직 시간표</strong> 확장 프로그램은 다음과 같은 정보를 수집합니다:</p>
+
+            <h3>자동으로 생성되는 정보</h3>
+            <ul>
+                <li><strong>익명 사용자 ID</strong>: Firebase 익명 인증을 통해 자동 생성되는 고유 식별자</li>
+                <li><strong>시간표 업로드 기록</strong>: 사용자가 업로드한 시간표 정보 (이미지 URL, 채널 ID, 업로드 시간)</li>
+                <li><strong>투표 기록</strong>: 좋아요/싫어요 투표 내역</li>
+                <li><strong>신고 기록</strong>: 잘못된 시간표 신고 내역</li>
+            </ul>
+
+            <h3>수집하지 않는 정보</h3>
+            <ul>
+                <li>이메일 주소</li>
+                <li>실명</li>
+                <li>전화번호</li>
+                <li>기타 개인 식별 가능 정보</li>
+            </ul>
+
+            <h2>2. 정보 사용 목적</h2>
+            <p>수집된 정보는 다음 목적으로만 사용됩니다:</p>
+            <ul>
+                <li>시간표 데이터 저장 및 표시</li>
+                <li>중복 투표 방지</li>
+                <li>잘못된 시간표 관리 및 검증</li>
+                <li>서비스 품질 향상</li>
+            </ul>
+
+            <h2>3. 정보 저장 및 보안</h2>
+            <ul>
+                <li>모든 데이터는 <strong>Google Firebase Firestore</strong>에 암호화되어 저장됩니다</li>
+                <li>Firebase는 Google Cloud Platform의 보안 인프라를 사용합니다</li>
+                <li>사용자 인증 정보는 로컬 브라우저에만 저장됩니다</li>
+            </ul>
+
+            <h2>4. 정보 공유</h2>
+            <ul>
+                <li>수집된 정보는 <strong>제3자와 공유하지 않습니다</strong></li>
+                <li>법적 요구가 있는 경우를 제외하고 외부에 제공하지 않습니다</li>
+            </ul>
+
+            <h2>5. 사용자 권리</h2>
+            <p>사용자는 다음과 같은 권리를 가집니다:</p>
+            <ul>
+                <li><strong>삭제권</strong>: 본인이 업로드한 시간표를 언제든 삭제할 수 있습니다</li>
+                <li><strong>접근권</strong>: 백업 코드를 통해 본인의 계정 정보에 접근할 수 있습니다</li>
+                <li><strong>철회권</strong>: 확장 프로그램을 제거하여 서비스 사용을 중단할 수 있습니다</li>
+            </ul>
+
+            <h2>6. 제3자 서비스</h2>
+            <p>이 확장 프로그램은 다음 서비스를 사용합니다:</p>
+            <ul>
+                <li><strong>Google Firebase</strong>: 데이터 저장 및 인증<br>
+                    <a href="https://firebase.google.com/support/privacy" target="_blank">Firebase 개인정보 처리방침</a>
+                </li>
+                <li><strong>Chzzk API</strong>: 채널 정보 조회<br>
+                    <a href="https://policy.naver.com/policy/privacy.html" target="_blank">네이버 개인정보 처리방침</a>
+                </li>
+            </ul>
+
+            <h2>7. 쿠키 및 추적</h2>
+            <p>이 확장 프로그램은:</p>
+            <ul>
+                <li><strong>쿠키를 사용하지 않습니다</strong></li>
+                <li><strong>사용자 추적을 하지 않습니다</strong></li>
+                <li><strong>광고를 표시하지 않습니다</strong></li>
+            </ul>
+
+            <div class="highlight">
+                <strong>📧 문의</strong><br>
+                개인정보 처리방침에 대한 문의사항은 GitHub Issues를 통해 연락해 주세요.
+            </div>
+        </div>
+
+        <!-- English Version -->
+        <div id="lang-en" class="section">
+            <h2>1. Information We Collect</h2>
+            <p>The <strong>Chzzk Timetable</strong> extension collects the following information:</p>
+
+            <h3>Automatically Generated Information</h3>
+            <ul>
+                <li><strong>Anonymous User ID</strong>: Unique identifier automatically generated through Firebase anonymous authentication</li>
+                <li><strong>Timetable Upload Records</strong>: Information about timetables uploaded by users (image URL, channel ID, upload time)</li>
+                <li><strong>Voting Records</strong>: Like/dislike voting history</li>
+                <li><strong>Report Records</strong>: Records of reported incorrect timetables</li>
+            </ul>
+
+            <h3>Information We Don't Collect</h3>
+            <ul>
+                <li>Email addresses</li>
+                <li>Real names</li>
+                <li>Phone numbers</li>
+                <li>Other personally identifiable information</li>
+            </ul>
+
+            <h2>2. How We Use Information</h2>
+            <p>Collected information is used only for:</p>
+            <ul>
+                <li>Storing and displaying timetable data</li>
+                <li>Preventing duplicate voting</li>
+                <li>Managing and verifying incorrect timetables</li>
+                <li>Improving service quality</li>
+            </ul>
+
+            <h2>3. Data Storage and Security</h2>
+            <ul>
+                <li>All data is stored encrypted in <strong>Google Firebase Firestore</strong></li>
+                <li>Firebase uses Google Cloud Platform's security infrastructure</li>
+                <li>User authentication information is stored only in the local browser</li>
+            </ul>
+
+            <h2>4. Information Sharing</h2>
+            <ul>
+                <li>Collected information is <strong>not shared with third parties</strong></li>
+                <li>Not provided externally except when legally required</li>
+            </ul>
+
+            <h2>5. User Rights</h2>
+            <p>Users have the following rights:</p>
+            <ul>
+                <li><strong>Right to Delete</strong>: Delete your uploaded timetables at any time</li>
+                <li><strong>Right to Access</strong>: Access your account information through backup codes</li>
+                <li><strong>Right to Withdraw</strong>: Stop using the service by removing the extension</li>
+            </ul>
+
+            <h2>6. Third-Party Services</h2>
+            <p>This extension uses the following services:</p>
+            <ul>
+                <li><strong>Google Firebase</strong>: Data storage and authentication<br>
+                    <a href="https://firebase.google.com/support/privacy" target="_blank">Firebase Privacy Policy</a>
+                </li>
+                <li><strong>Chzzk API</strong>: Channel information lookup<br>
+                    <a href="https://policy.naver.com/policy/privacy_en.html" target="_blank">Naver Privacy Policy</a>
+                </li>
+            </ul>
+
+            <h2>7. Cookies and Tracking</h2>
+            <p>This extension:</p>
+            <ul>
+                <li><strong>Does not use cookies</strong></li>
+                <li><strong>Does not track users</strong></li>
+                <li><strong>Does not display advertisements</strong></li>
+            </ul>
+
+            <div class="highlight">
+                <strong>📧 Contact</strong><br>
+                For questions about this privacy policy, please contact us through GitHub Issues.
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>치지직 시간표 / Chzzk Timetable</strong></p>
+            <p>이 개인정보 처리방침은 확장 프로그램을 설치하고 사용함으로써 동의하는 것으로 간주됩니다.<br>
+            By installing and using this extension, you consent to this privacy policy.</p>
+        </div>
+    </div>
+
+    <script>
+        function showLang(lang) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.lang-toggle button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById('lang-' + lang).classList.add('active');
+            document.getElementById('btn-' + lang).classList.add('active');
+        }
+    </script>
+</body>
+</html>

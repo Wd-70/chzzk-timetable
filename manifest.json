@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "치지직 시간표",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "치지직 방송의 시간표를 확인할 수 있는 확장 프로그램",
   "icons": {
     "16": "images/icon16.png",
@@ -18,7 +18,10 @@
   },
   "options_page": "admin.html",
   "permissions": ["storage", "activeTab"],
-  "host_permissions": ["https://chzzk.naver.com/*"],
+  "host_permissions": [
+    "https://chzzk.naver.com/*",
+    "https://api.chzzk.naver.com/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },

@@ -301,4 +301,284 @@ async function getBackupCode() {
   return auth.currentUser.uid;
 }
 
+// ==================== 관리자 전용 함수 ====================
+
+/**
+ * 관리자 대시보드 통계 조회
+ * @returns {Promise<Object>} 통계 데이터
+ */
+async function getAdminStats() {
+  await ensureAuthenticated();
+
+  console.log('📊 관리자 통계 조회 중...');
+
+  const [total, removed, hidden, pendingReports] = await Promise.all([
+    // 전체 시간표 (활성)
+    db.collection('timetables')
+      .where('r', '==', false)
+      .where('h', '==', false)
+      .get()
+      .then(snap => snap.size),
+
+    // 삭제된 시간표
+    db.collection('timetables')
+      .where('r', '==', true)
+      .get()
+      .then(snap => snap.size),
+
+    // 숨겨진 시간표
+    db.collection('timetables')
+      .where('h', '==', true)
+      .where('r', '==', false)
+      .get()
+      .then(snap => snap.size),
+
+    // 대기 중 신고
+    db.collection('reports')
+      .where('st', '==', 'p')
+      .get()
+      .then(snap => snap.size)
+  ]);
+
+  return { total, removed, hidden, pendingReports };
+}
+
+/**
+ * 신고 목록 조회
+ * @param {string} status 'p' (pending), 'a' (approved), 'r' (rejected)
+ * @returns {Promise<Array>}
+ */
+async function getReports(status) {
+  await ensureAuthenticated();
+
+  console.log('🚨 신고 조회:', status);
+
+  const snapshot = await db.collection('reports')
+    .where('st', '==', status)
+    .orderBy('at', 'desc')
+    .limit(50)
+    .get();
+
+  const reports = [];
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    reports.push({
+      id: doc.id,
+      timetableId: data.tid,
+      reportedBy: data.uid,
+      reason: data.rsn,
+      reportedAt: new Date(data.at),
+      status: data.st
+    });
+  });
+
+  console.log('✅ 신고 조회 완료:', reports.length, '개');
+  return reports;
+}
+
+/**
+ * 신고 승인 (시간표 삭제)
+ * @param {string} reportId
+ * @param {string} timetableId
+ */
+async function approveReportAdmin(reportId, timetableId) {
+  await ensureAuthenticated();
+
+  console.log('✅ 신고 승인:', reportId, timetableId);
+
+  await db.runTransaction(async (transaction) => {
+    const reportRef = db.collection('reports').doc(reportId);
+    const timetableRef = db.collection('timetables').doc(timetableId);
+
+    // 신고 상태 업데이트
+    transaction.update(reportRef, { st: 'a' });
+
+    // 시간표 삭제 (r=true)
+    transaction.update(timetableRef, { r: true });
+  });
+
+  console.log('✅ 신고 승인 완료');
+}
+
+/**
+ * 신고 거부
+ * @param {string} reportId
+ */
+async function rejectReportAdmin(reportId) {
+  await ensureAuthenticated();
+
+  console.log('❌ 신고 거부:', reportId);
+
+  await db.collection('reports').doc(reportId).update({ st: 'r' });
+
+  console.log('✅ 신고 거부 완료');
+}
+
+/**
+ * 삭제된 시간표 목록 조회
+ * @returns {Promise<Array>}
+ */
+async function getRemovedTimetables() {
+  await ensureAuthenticated();
+
+  console.log('🗑️ 삭제된 시간표 조회 중...');
+
+  const snapshot = await db.collection('timetables')
+    .where('r', '==', true)
+    .orderBy('at', 'desc')
+    .limit(50)
+    .get();
+
+  const timetables = [];
+  snapshot.forEach(doc => {
+    timetables.push(expandTimetable(doc));
+  });
+
+  console.log('✅ 삭제된 시간표 조회 완료:', timetables.length, '개');
+  return timetables;
+}
+
+/**
+ * 시간표 복구 (관리자 ID로 변경)
+ * @param {string} timetableId
+ */
+async function restoreTimetableAdmin(timetableId) {
+  await ensureAuthenticated();
+
+  const adminUid = auth.currentUser.uid;
+
+  console.log('♻️ 시간표 복구 (관리자 ID로):', timetableId);
+
+  await db.collection('timetables').doc(timetableId).update({
+    r: false,
+    uid: adminUid // 관리자 ID로 변경
+  });
+
+  console.log('✅ 시간표 복구 완료');
+}
+
+/**
+ * 시간표 영구 삭제
+ * @param {string} timetableId
+ */
+async function permanentlyDeleteTimetableAdmin(timetableId) {
+  await ensureAuthenticated();
+
+  console.log('🗑️ 시간표 영구 삭제:', timetableId);
+
+  await db.collection('timetables').doc(timetableId).delete();
+
+  console.log('✅ 시간표 영구 삭제 완료');
+}
+
+/**
+ * 숨겨진 시간표 목록 조회
+ * @returns {Promise<Array>}
+ */
+async function getHiddenTimetables() {
+  await ensureAuthenticated();
+
+  console.log('👁️ 숨겨진 시간표 조회 중...');
+
+  const snapshot = await db.collection('timetables')
+    .where('h', '==', true)
+    .where('r', '==', false)
+    .orderBy('at', 'desc')
+    .limit(50)
+    .get();
+
+  const timetables = [];
+  snapshot.forEach(doc => {
+    timetables.push(expandTimetable(doc));
+  });
+
+  console.log('✅ 숨겨진 시간표 조회 완료:', timetables.length, '개');
+  return timetables;
+}
+
+/**
+ * 시간표 숨김 해제
+ * @param {string} timetableId
+ */
+async function unhideTimetableAdmin(timetableId) {
+  await ensureAuthenticated();
+
+  console.log('👁️ 시간표 숨김 해제:', timetableId);
+
+  await db.collection('timetables').doc(timetableId).update({ h: false });
+
+  console.log('✅ 시간표 숨김 해제 완료');
+}
+
+/**
+ * 시간표 삭제 (관리자용)
+ * @param {string} timetableId
+ */
+async function deleteTimetableAdmin(timetableId) {
+  await ensureAuthenticated();
+
+  console.log('🗑️ 시간표 삭제 (관리자):', timetableId);
+
+  await db.collection('timetables').doc(timetableId).update({ r: true });
+
+  console.log('✅ 시간표 삭제 완료');
+}
+
+/**
+ * ID로 시간표 조회
+ * @param {string} timetableId
+ * @returns {Promise<Object|null>}
+ */
+async function getTimetableById(timetableId) {
+  await ensureAuthenticated();
+
+  console.log('🔍 시간표 조회:', timetableId);
+
+  const doc = await db.collection('timetables').doc(timetableId).get();
+
+  if (!doc.exists) {
+    return null;
+  }
+
+  return expandTimetable(doc);
+}
+
+/**
+ * 전체 시간표 조회 (관리자용)
+ * @param {string} channelId 선택적 채널 ID 필터
+ * @param {number} limit 조회할 최대 개수
+ * @returns {Promise<Array>}
+ */
+async function getAllTimetables(channelId = null, limit = 100) {
+  await ensureAuthenticated();
+
+  console.log('📋 전체 시간표 조회:', channelId || '전체');
+
+  let query = db.collection('timetables')
+    .where('r', '==', false)
+    .where('h', '==', false)
+    .orderBy('at', 'desc')
+    .limit(limit);
+
+  // 채널 ID 필터
+  if (channelId) {
+    query = db.collection('timetables')
+      .where('cid', '==', channelId)
+      .where('r', '==', false)
+      .where('h', '==', false)
+      .orderBy('at', 'desc')
+      .limit(limit);
+  }
+
+  const snapshot = await query.get();
+
+  const timetables = [];
+  snapshot.forEach(doc => {
+    timetables.push(expandTimetable(doc));
+  });
+
+  console.log('✅ 전체 시간표 조회 완료:', timetables.length, '개');
+  return timetables;
+}
+
 console.log('✅ Firebase Service loaded');

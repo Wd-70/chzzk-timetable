@@ -278,6 +278,57 @@
         color: #666;
       }
 
+      /* 안내 화면 (치지직 페이지가 아닐 때) */
+      #guideScreen {
+        display: none;
+        text-align: center;
+        padding: 60px 20px;
+      }
+
+      .guide-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        animation: bounce 2s infinite;
+      }
+
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+
+      .guide-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #e0e0e0;
+        margin-bottom: 15px;
+      }
+
+      .guide-description {
+        font-size: 14px;
+        color: #999;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .guide-steps {
+        text-align: left;
+        background: #1a1a1a;
+        padding: 15px 20px;
+        border-radius: 8px;
+        border: 1px solid #222;
+        margin-top: 20px;
+      }
+
+      .guide-steps li {
+        color: #e0e0e0;
+        margin-bottom: 10px;
+        font-size: 13px;
+      }
+
+      .guide-steps li:last-child {
+        margin-bottom: 0;
+      }
+
       /* Buy me a coffee 버튼 */
       .bmc-button {
         display: inline-flex;
@@ -328,6 +379,24 @@
         <p style="font-size: 12px; color: #999;">
           ID: <span id="channelId">...</span>
         </p>
+      </div>
+
+      <!-- 안내 화면 (치지직 페이지가 아닐 때) -->
+      <div id="guideScreen">
+        <div class="guide-icon">📺</div>
+        <h2 class="guide-title">치지직 방송 페이지에서 사용해주세요!</h2>
+        <p class="guide-description">
+          이 확장 프로그램은 치지직 스트리머의 시간표를 공유하고<br>
+          확인할 수 있는 커뮤니티 기반 도구입니다.
+        </p>
+        <div class="guide-steps">
+          <ol>
+            <li>🎮 치지직(chzzk.naver.com)에 접속하세요</li>
+            <li>🎯 원하는 스트리머의 방송 페이지로 이동하세요</li>
+            <li>✨ 이 확장 프로그램 아이콘을 다시 클릭하세요</li>
+            <li>📅 시간표를 확인하거나 새로 등록할 수 있습니다!</li>
+          </ol>
+        </div>
       </div>
 
       <div class="week-info">
@@ -409,6 +478,8 @@
         <div class="footer-links">
           <p style="font-size: 12px; color: #999; text-align: center; margin: 0;">
             <a href="#" id="backupCodeLink" style="color: #00bcd4;">백업 코드 보기</a>
+            <span id="adminLinkSeparator" style="display: none; margin: 0 8px;">•</span>
+            <a href="#" id="adminPageLink" style="color: #03c75a; display: none;">🔧 관리자 페이지</a>
           </p>
           <a href="https://buymeacoffee.com/wd70" target="_blank" class="bmc-button">
             <span>☕</span>
@@ -427,6 +498,9 @@
     <script src="firebase-config.js"></script>
     <script src="utils.js"></script>
     <script src="firebase-service.js"></script>
+
+    <!-- 관리자 설정 -->
+    <script src="admin-config.js"></script>
 
     <!-- 앱 로직 -->
     <script src="popup.js"></script>

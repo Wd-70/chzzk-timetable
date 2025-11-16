@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>치지직 시간표 - 관리자 페이지</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <!-- 인증 체크 중 -->
+    <div id="authCheck" class="auth-check">
+      <div class="loading-spinner">⏳</div>
+      <p>관리자 인증 확인 중...</p>
+    </div>
+
+    <!-- 권한 없음 -->
+    <div id="noAccess" class="no-access" style="display: none;">
+      <div class="error-icon">🚫</div>
+      <h2>접근 권한이 없습니다</h2>
+      <p>이 페이지는 관리자만 접근할 수 있습니다.</p>
+      <p class="user-id">사용자 ID: <span id="currentUserId"></span></p>
+    </div>
+
+    <!-- 관리자 페이지 -->
+    <div id="adminPanel" class="admin-panel" style="display: none;">
+      <!-- 헤더 -->
+      <header class="header">
+        <h1>🔧 치지직 시간표 관리자</h1>
+        <div class="header-info">
+          <span class="admin-badge">관리자</span>
+          <span class="user-info" id="adminUserId"></span>
+        </div>
+      </header>
+
+      <!-- 대시보드 -->
+      <section class="dashboard">
+        <h2>📊 대시보드</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-info">
+              <div class="stat-label">전체 시간표</div>
+              <div class="stat-value" id="totalTimetables">-</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🚨</div>
+            <div class="stat-info">
+              <div class="stat-label">대기 중 신고</div>
+              <div class="stat-value" id="pendingReports">-</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🗑️</div>
+            <div class="stat-info">
+              <div class="stat-label">삭제된 시간표</div>
+              <div class="stat-value" id="removedTimetables">-</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👁️</div>
+            <div class="stat-info">
+              <div class="stat-label">숨겨진 시간표</div>
+              <div class="stat-value" id="hiddenTimetables">-</div>
+            </div>
+          </div>
+        </div>
+        <button id="refreshStats" class="btn-refresh">🔄 새로고침</button>
+      </section>
+
+      <!-- 탭 네비게이션 -->
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="reports">🚨 신고 관리</button>
+        <button class="tab-btn" data-tab="removed">🗑️ 삭제된 시간표</button>
+        <button class="tab-btn" data-tab="hidden">👁️ 숨겨진 시간표</button>
+        <button class="tab-btn" data-tab="all">📋 전체 시간표</button>
+      </nav>
+
+      <!-- 탭 컨텐츠 -->
+      <div class="tab-content">
+        <!-- 신고 관리 탭 -->
+        <div id="tab-reports" class="tab-pane active">
+          <h2>🚨 신고 관리</h2>
+          <div class="filters">
+            <label>
+              <input type="radio" name="reportStatus" value="p" checked /> 대기 중
+            </label>
+            <label>
+              <input type="radio" name="reportStatus" value="a" /> 승인됨
+            </label>
+            <label>
+              <input type="radio" name="reportStatus" value="r" /> 거부됨
+            </label>
+          </div>
+          <div id="reportsList" class="data-list">
+            <div class="loading">신고 목록을 불러오는 중...</div>
+          </div>
+        </div>
+
+        <!-- 삭제된 시간표 탭 -->
+        <div id="tab-removed" class="tab-pane">
+          <h2>🗑️ 삭제된 시간표</h2>
+          <div id="removedList" class="data-list">
+            <div class="loading">삭제된 시간표를 불러오는 중...</div>
+          </div>
+        </div>
+
+        <!-- 숨겨진 시간표 탭 -->
+        <div id="tab-hidden" class="tab-pane">
+          <h2>👁️ 숨겨진 시간표</h2>
+          <div id="hiddenList" class="data-list">
+            <div class="loading">숨겨진 시간표를 불러오는 중...</div>
+          </div>
+        </div>
+
+        <!-- 전체 시간표 탭 -->
+        <div id="tab-all" class="tab-pane">
+          <h2>📋 전체 시간표</h2>
+          <div class="filters">
+            <input
+              type="text"
+              id="channelFilter"
+              placeholder="채널 ID로 검색..."
+              style="padding: 8px 12px; border: 1px solid #333; background: #2a2a2a; color: #e0e0e0; border-radius: 4px; width: 250px;"
+            />
+            <button id="searchBtn" class="btn btn-approve" style="margin-left: 10px;">🔍 검색</button>
+            <button id="clearFilterBtn" class="btn btn-view" style="margin-left: 5px;">✖️ 초기화</button>
+          </div>
+          <div id="allTimetablesList" class="data-list">
+            <div class="loading">전체 시간표를 불러오는 중...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="firebase-sdk/firebase-app-compat.js"></script>
+    <script src="firebase-sdk/firebase-auth-compat.js"></script>
+    <script src="firebase-sdk/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase 설정 및 서비스 -->
+    <script src="firebase-config.js"></script>
+    <script src="utils.js"></script>
+    <script src="firebase-service.js"></script>
+
+    <!-- 관리자 설정 -->
+    <script src="admin-config.js"></script>
+
+    <!-- 관리자 로직 -->
+    <script src="admin.js"></script>
+  </body>
+</html>

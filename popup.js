@@ -68,6 +68,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 7. 이벤트 리스너 설정
     setupEventListeners();
 
+    // 8. 관리자 링크 표시 (관리자인 경우)
+    const currentUserId = getCurrentUserId();
+    if (currentUserId && isAdmin(currentUserId)) {
+      document.getElementById('adminPageLink').style.display = 'inline';
+      document.getElementById('adminLinkSeparator').style.display = 'inline';
+    }
+
   } catch (error) {
     console.error('초기화 오류:', error);
     showError(getFriendlyErrorMessage(error));
@@ -266,6 +273,12 @@ function setupEventListeners() {
     updateWeekButtons();
     await loadTimetables();
   });
+
+  // 관리자 페이지 링크
+  document.getElementById('adminPageLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.runtime.openOptionsPage();
+  });
 }
 
 // 투표 처리
@@ -448,13 +461,24 @@ ${code}
   }
 }
 
-// 에러 표시
+// 에러 표시 (안내 화면 표시)
 function showError(message) {
-  document.getElementById('loadingState').innerHTML = `
-    <div style="color: #f44336;">
-      ❌ ${message}
-    </div>
-  `;
+  // 불필요한 섹션 숨기기
+  document.getElementById('channelInfo').style.display = 'none';
+  document.querySelector('.week-info').style.display = 'none';
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('timetableView').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'none';
+  document.querySelector('.upload-section').style.display = 'none';
+
+  // 백업 코드 및 관리자 링크 숨기기
+  const footerLinks = document.querySelector('.footer-links p');
+  if (footerLinks) {
+    footerLinks.style.display = 'none';
+  }
+
+  // 안내 화면 표시
+  document.getElementById('guideScreen').style.display = 'block';
 }
 
 // 주차 표시 업데이트
