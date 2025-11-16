@@ -1,0 +1,20 @@
+# Firebase 설정 파일 (실제 API 키 포함)
+firebase-config.js
+
+# ZIP 패키지 파일 (빌드 결과물)
+*.zip
+
+# 개발 환경 파일
+.DS_Store
+Thumbs.db
+
+# IDE 설정
+.vscode/
+.idea/
+
+# 로그 파일
+*.log
+
+# 임시 파일
+*.tmp
+*.temp

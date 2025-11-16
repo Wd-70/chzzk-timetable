@@ -159,9 +159,14 @@ chzzk-timetable/
    - Firestore Database 활성화
    - Authentication > 익명 로그인 활성화
 
-2. Firebase 설정 파일 업데이트:
+2. Firebase 설정 파일 생성:
+   ```bash
+   # 템플릿 파일을 복사
+   cp firebase-config.example.js firebase-config.js
+   ```
+
+   그 다음 `firebase-config.js` 파일을 열어서 Firebase Console의 실제 설정값으로 교체:
    ```javascript
-   // firebase-config.js
    const firebaseConfig = {
      apiKey: "YOUR_API_KEY",
      authDomain: "YOUR_AUTH_DOMAIN",
@@ -169,6 +174,8 @@ chzzk-timetable/
      // ...
    };
    ```
+
+   **⚠️ 중요**: `firebase-config.js`는 `.gitignore`에 포함되어 있으므로 Git에 커밋되지 않습니다.
 
 3. Firestore 보안 규칙 설정:
    - Firebase Console > Firestore Database > 규칙
