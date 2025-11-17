@@ -56,9 +56,14 @@ async function getTimetables(channelId, weekStartCompact) {
 
   const snapshot = await q.get();
 
+  const currentUserId = auth.currentUser?.uid;
   const timetables = [];
   snapshot.forEach(doc => {
-    timetables.push(expandTimetable(doc));
+    const tt = expandTimetable(doc);
+    // 보안: 다른 사람의 uid 노출 방지
+    tt.isOwner = tt.uploadedBy === currentUserId;
+    delete tt.uploadedBy; // uid 완전 제거!
+    timetables.push(tt);
   });
 
   console.log('✅ 시간표 조회 완료:', timetables.length, '개');

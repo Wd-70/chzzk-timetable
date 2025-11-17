@@ -236,7 +236,7 @@ async function loadRemovedTimetables() {
             </div>
             <div class="item-meta">
               <span>📅 ${tt.weekStart} ~ ${tt.weekEnd}</span>
-              <span>👤 익명${tt.uploadedByHash}</span>
+              <span>👤 업로더: ${tt.uploadedByHash}</span>
               <span>👍 ${tt.likes}</span>
               <span>👎 ${tt.dislikes}</span>
             </div>
@@ -328,7 +328,7 @@ async function loadHiddenTimetables() {
             </div>
             <div class="item-meta">
               <span>📅 ${tt.weekStart} ~ ${tt.weekEnd}</span>
-              <span>👤 익명${tt.uploadedByHash}</span>
+              <span>👤 업로더: ${tt.uploadedByHash}</span>
               <span>👍 ${tt.likes}</span>
               <span>👎 ${tt.dislikes}</span>
               <span style="color: #f44336;">점수: ${tt.score}</span>
@@ -421,7 +421,7 @@ async function loadAllTimetables(channelId = null) {
             </div>
             <div class="item-meta">
               <span>📅 ${tt.weekStart} ~ ${tt.weekEnd}</span>
-              <span>👤 익명${tt.uploadedByHash}</span>
+              <span>👤 업로더: ${tt.uploadedByHash}</span>
               <span>👍 ${tt.likes}</span>
               <span>👎 ${tt.dislikes}</span>
               <span>점수: ${tt.score}</span>

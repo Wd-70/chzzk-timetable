@@ -129,14 +129,13 @@ function displayTimetable(index) {
   const userVote = userVotes[timetable.id];
   updateVoteButtons(userVote);
 
-  // 업로더 정보 (해시만 표시, 불필요한 텍스트 제거)
-  document.getElementById('uploaderInfo').textContent = `익명${timetable.uploadedByHash}`;
+  // 업로더 정보 (해시만 표시)
+  document.getElementById('uploaderInfo').textContent = `업로더: ${timetable.uploadedByHash}`;
   document.getElementById('uploadTime').textContent = getRelativeTime(timetable.uploadedAt);
 
   // 삭제 버튼 표시 (자신이 등록한 것만)
   const deleteBtn = document.getElementById('deleteBtn');
-  const currentUserId = getCurrentUserId();
-  if (currentUserId && timetable.uploadedBy === currentUserId) {
+  if (timetable.isOwner) {
     deleteBtn.style.display = 'inline-block';
   } else {
     deleteBtn.style.display = 'none';
