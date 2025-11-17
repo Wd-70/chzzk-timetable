@@ -130,6 +130,22 @@ function compactToReadable(compact) {
 }
 
 /**
+ * uid를 짧은 해시로 변환 (공개 사용자 ID용)
+ * @param {string} uid - 비밀키로 취급되는 원본 uid
+ * @returns {string} - 8자리 해시 (익명xxx... 형태로 표시됨)
+ */
+function hashUid(uid) {
+  let hash = 0;
+  for (let i = 0; i < uid.length; i++) {
+    const char = uid.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // 32bit 정수로 변환
+  }
+  // 양수로 변환 후 36진수(0-9a-z)로 인코딩, 8자리로 제한
+  return Math.abs(hash).toString(36).padStart(8, '0').slice(0, 8);
+}
+
+/**
  * Firestore 문서를 UI 표시용으로 변환
  * @param {object} doc Firestore 문서
  * @returns {object} 변환된 데이터
@@ -144,7 +160,8 @@ function expandTimetable(doc) {
     weekEnd: compactToReadable(data.we),
     weekStartCompact: data.ws,
     weekEndCompact: data.we,
-    uploadedBy: data.uid,
+    uploadedBy: data.uid, // 비밀키 (권한 체크용, UI에 절대 표시 금지!)
+    uploadedByHash: hashUid(data.uid), // 공개 ID (UI 표시용)
     uploadedAt: new Date(data.at),
     likes: data.l || 0,
     dislikes: data.d || 0,

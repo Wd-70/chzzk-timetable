@@ -129,9 +129,8 @@ function displayTimetable(index) {
   const userVote = userVotes[timetable.id];
   updateVoteButtons(userVote);
 
-  // 업로더 정보
-  const uploaderText = timetable.uploadedBy.slice(0, 8) + '...';
-  document.getElementById('uploaderInfo').textContent = `업로더: 익명${uploaderText}`;
+  // 업로더 정보 (해시만 표시, 불필요한 텍스트 제거)
+  document.getElementById('uploaderInfo').textContent = `익명${timetable.uploadedByHash}`;
   document.getElementById('uploadTime').textContent = getRelativeTime(timetable.uploadedAt);
 
   // 삭제 버튼 표시 (자신이 등록한 것만)
