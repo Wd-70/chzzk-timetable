@@ -581,4 +581,30 @@ async function getAllTimetables(channelId = null, limit = 100) {
   return timetables;
 }
 
+/**
+ * 시간표 이미지 URL 수정 (관리자용)
+ * @param {string} timetableId
+ * @param {string} newImageUrl
+ * @returns {Promise<void>}
+ */
+async function updateTimetableImageUrl(timetableId, newImageUrl) {
+  await ensureAuthenticated();
+
+  console.log('🖼️ 시간표 이미지 URL 수정:', timetableId, newImageUrl);
+
+  // URL 검증
+  if (!newImageUrl.startsWith('http://') && !newImageUrl.startsWith('https://')) {
+    throw new Error('유효한 이미지 URL이 아닙니다. (http:// 또는 https://로 시작해야 합니다)');
+  }
+
+  await db.collection('timetables').doc(timetableId).update({
+    img: newImageUrl
+  });
+
+  console.log('✅ 시간표 이미지 URL 수정 완료');
+
+  // 캐시 무효화
+  await chrome.storage.local.clear();
+}
+
 console.log('✅ Firebase Service loaded');

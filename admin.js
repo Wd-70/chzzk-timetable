@@ -252,6 +252,18 @@ async function loadRemovedTimetables() {
         </div>
         <div class="item-content">
           <img src="${tt.imageUrl}" alt="시간표" class="item-image" data-image-url="${tt.imageUrl}" />
+          <div class="item-url">
+            <div class="url-display">
+              <strong>이미지 URL:</strong>
+              <span class="url-text">${tt.imageUrl}</span>
+              <button class="btn-edit-url" onclick="editImageUrl('${tt.id}')">✏️ 수정</button>
+            </div>
+            <div class="url-edit" style="display: none;">
+              <input type="text" class="url-input" value="${tt.imageUrl}" />
+              <button class="btn btn-approve" onclick="saveImageUrl('${tt.id}')">💾 저장</button>
+              <button class="btn btn-reject" onclick="cancelEditUrl('${tt.id}')">❌ 취소</button>
+            </div>
+          </div>
         </div>
       </div>
     `).join('');
@@ -330,6 +342,18 @@ async function loadHiddenTimetables() {
         </div>
         <div class="item-content">
           <img src="${tt.imageUrl}" alt="시간표" class="item-image" data-image-url="${tt.imageUrl}" />
+          <div class="item-url">
+            <div class="url-display">
+              <strong>이미지 URL:</strong>
+              <span class="url-text">${tt.imageUrl}</span>
+              <button class="btn-edit-url" onclick="editImageUrl('${tt.id}')">✏️ 수정</button>
+            </div>
+            <div class="url-edit" style="display: none;">
+              <input type="text" class="url-input" value="${tt.imageUrl}" />
+              <button class="btn btn-approve" onclick="saveImageUrl('${tt.id}')">💾 저장</button>
+              <button class="btn btn-reject" onclick="cancelEditUrl('${tt.id}')">❌ 취소</button>
+            </div>
+          </div>
         </div>
       </div>
     `).join('');
@@ -409,6 +433,18 @@ async function loadAllTimetables(channelId = null) {
         </div>
         <div class="item-content">
           <img src="${tt.imageUrl}" alt="시간표" class="item-image" data-image-url="${tt.imageUrl}" />
+          <div class="item-url">
+            <div class="url-display">
+              <strong>이미지 URL:</strong>
+              <span class="url-text">${tt.imageUrl}</span>
+              <button class="btn-edit-url" onclick="editImageUrl('${tt.id}')">✏️ 수정</button>
+            </div>
+            <div class="url-edit" style="display: none;">
+              <input type="text" class="url-input" value="${tt.imageUrl}" />
+              <button class="btn btn-approve" onclick="saveImageUrl('${tt.id}')">💾 저장</button>
+              <button class="btn btn-reject" onclick="cancelEditUrl('${tt.id}')">❌ 취소</button>
+            </div>
+          </div>
         </div>
       </div>
     `).join('');
@@ -642,6 +678,107 @@ function showImageModal(imageUrl) {
     }
   };
   document.addEventListener('keydown', handleEscape);
+}
+
+// 이미지 URL 수정 모드 전환
+function editImageUrl(timetableId) {
+  const item = document.querySelector(`.data-item[data-id="${timetableId}"]`);
+  if (!item) return;
+
+  const urlDisplay = item.querySelector('.url-display');
+  const urlEdit = item.querySelector('.url-edit');
+
+  if (urlDisplay && urlEdit) {
+    urlDisplay.style.display = 'none';
+    urlEdit.style.display = 'flex';
+
+    // 입력 필드에 포커스
+    const input = urlEdit.querySelector('.url-input');
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }
+}
+
+// 이미지 URL 수정 취소
+function cancelEditUrl(timetableId) {
+  const item = document.querySelector(`.data-item[data-id="${timetableId}"]`);
+  if (!item) return;
+
+  const urlDisplay = item.querySelector('.url-display');
+  const urlEdit = item.querySelector('.url-edit');
+  const urlInput = item.querySelector('.url-input');
+  const originalUrl = item.querySelector('.url-text').textContent;
+
+  if (urlDisplay && urlEdit && urlInput) {
+    // 원래 URL로 복원
+    urlInput.value = originalUrl;
+
+    // UI 전환
+    urlEdit.style.display = 'none';
+    urlDisplay.style.display = 'flex';
+  }
+}
+
+// 이미지 URL 저장
+async function saveImageUrl(timetableId) {
+  const item = document.querySelector(`.data-item[data-id="${timetableId}"]`);
+  if (!item) return;
+
+  const urlInput = item.querySelector('.url-input');
+  const newUrl = urlInput.value.trim();
+
+  if (!newUrl) {
+    alert('URL을 입력해주세요.');
+    return;
+  }
+
+  // URL 형식 검증
+  if (!newUrl.startsWith('http://') && !newUrl.startsWith('https://')) {
+    alert('유효한 이미지 URL을 입력해주세요.\n(http:// 또는 https://로 시작해야 합니다)');
+    return;
+  }
+
+  // 저장 버튼 비활성화
+  const saveBtn = item.querySelector('.url-edit .btn-approve');
+  const cancelBtn = item.querySelector('.url-edit .btn-reject');
+  if (saveBtn) saveBtn.disabled = true;
+  if (cancelBtn) cancelBtn.disabled = true;
+
+  try {
+    // Firebase 업데이트
+    await updateTimetableImageUrl(timetableId, newUrl);
+
+    // UI 업데이트
+    const urlText = item.querySelector('.url-text');
+    const itemImage = item.querySelector('.item-image');
+
+    if (urlText) urlText.textContent = newUrl;
+    if (itemImage) {
+      itemImage.src = newUrl;
+      itemImage.setAttribute('data-image-url', newUrl);
+    }
+
+    // 편집 모드 종료
+    const urlDisplay = item.querySelector('.url-display');
+    const urlEdit = item.querySelector('.url-edit');
+
+    if (urlDisplay && urlEdit) {
+      urlEdit.style.display = 'none';
+      urlDisplay.style.display = 'flex';
+    }
+
+    alert('✅ 이미지 URL이 성공적으로 수정되었습니다.');
+
+  } catch (error) {
+    console.error('이미지 URL 수정 오류:', error);
+    alert('오류: ' + error.message);
+  } finally {
+    // 버튼 다시 활성화
+    if (saveBtn) saveBtn.disabled = false;
+    if (cancelBtn) cancelBtn.disabled = false;
+  }
 }
 
 console.log('✅ Admin script loaded');
