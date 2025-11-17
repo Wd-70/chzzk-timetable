@@ -131,7 +131,6 @@ function displayTimetable(index) {
 
   // 업로더 정보 (해시만 표시)
   document.getElementById('uploaderInfo').textContent = `업로더: ${timetable.uploadedByHash}`;
-  document.getElementById('uploadTime').textContent = getRelativeTime(timetable.uploadedAt);
 
   // 삭제 버튼 표시 (자신이 등록한 것만)
   const deleteBtn = document.getElementById('deleteBtn');

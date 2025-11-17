@@ -132,8 +132,8 @@ function compactToReadable(compact) {
 /**
  * uid를 짧은 해시로 변환 (공개 사용자 ID용)
  * FNV-1a 해시 알고리즘 사용으로 더 나은 분산 보장
- * @param {string} uid - 비밀키로 취급되는 원본 uid
- * @returns {string} - 8자리 해시 (업로더: xxx... 형태로 표시됨)
+ * @param {string} uid - 비밀키로 취급되는 원본 uid (28자리)
+ * @returns {string} - 16자리 해시 (업로더: xxx... 형태로 표시됨)
  */
 function hashUid(uid) {
   // FNV-1a 해시 (빠르고 좋은 분산)
@@ -152,13 +152,13 @@ function hashUid(uid) {
   // 36진수로 변환 (0-9a-z)
   let result = hash.toString(36);
 
-  // 8자리로 맞추기 (부족하면 뒤에 해시 재사용)
-  while (result.length < 8) {
+  // 16자리로 맞추기 (부족하면 뒤에 해시 재사용)
+  while (result.length < 16) {
     hash = Math.imul(hash, FNV_PRIME) >>> 0;
     result += hash.toString(36);
   }
 
-  return result.slice(0, 8);
+  return result.slice(0, 16);
 }
 
 /**
