@@ -256,12 +256,12 @@ async function loadRemovedTimetables() {
             <div class="url-display">
               <strong>이미지 URL:</strong>
               <span class="url-text">${tt.imageUrl}</span>
-              <button class="btn-edit-url" onclick="editImageUrl('${tt.id}')">✏️ 수정</button>
+              <button class="btn-edit-url" data-action="edit-url" data-timetable-id="${tt.id}">✏️ 수정</button>
             </div>
             <div class="url-edit" style="display: none;">
               <input type="text" class="url-input" value="${tt.imageUrl}" />
-              <button class="btn btn-approve" onclick="saveImageUrl('${tt.id}')">💾 저장</button>
-              <button class="btn btn-reject" onclick="cancelEditUrl('${tt.id}')">❌ 취소</button>
+              <button class="btn btn-approve" data-action="save-url" data-timetable-id="${tt.id}">💾 저장</button>
+              <button class="btn btn-reject" data-action="cancel-edit-url" data-timetable-id="${tt.id}">❌ 취소</button>
             </div>
           </div>
         </div>
@@ -286,6 +286,9 @@ async function loadRemovedTimetables() {
         channelNameSpan.textContent = `${channelInfo.name} (${channelId})`;
       }
     });
+
+    // URL 편집 버튼 이벤트 리스너 추가
+    setupUrlEditListeners(container);
 
   } catch (error) {
     console.error('삭제된 시간표 로드 오류:', error);
@@ -346,12 +349,12 @@ async function loadHiddenTimetables() {
             <div class="url-display">
               <strong>이미지 URL:</strong>
               <span class="url-text">${tt.imageUrl}</span>
-              <button class="btn-edit-url" onclick="editImageUrl('${tt.id}')">✏️ 수정</button>
+              <button class="btn-edit-url" data-action="edit-url" data-timetable-id="${tt.id}">✏️ 수정</button>
             </div>
             <div class="url-edit" style="display: none;">
               <input type="text" class="url-input" value="${tt.imageUrl}" />
-              <button class="btn btn-approve" onclick="saveImageUrl('${tt.id}')">💾 저장</button>
-              <button class="btn btn-reject" onclick="cancelEditUrl('${tt.id}')">❌ 취소</button>
+              <button class="btn btn-approve" data-action="save-url" data-timetable-id="${tt.id}">💾 저장</button>
+              <button class="btn btn-reject" data-action="cancel-edit-url" data-timetable-id="${tt.id}">❌ 취소</button>
             </div>
           </div>
         </div>
@@ -376,6 +379,9 @@ async function loadHiddenTimetables() {
         channelNameSpan.textContent = `${channelInfo.name} (${channelId})`;
       }
     });
+
+    // URL 편집 버튼 이벤트 리스너 추가
+    setupUrlEditListeners(container);
 
   } catch (error) {
     console.error('숨겨진 시간표 로드 오류:', error);
@@ -437,12 +443,12 @@ async function loadAllTimetables(channelId = null) {
             <div class="url-display">
               <strong>이미지 URL:</strong>
               <span class="url-text">${tt.imageUrl}</span>
-              <button class="btn-edit-url" onclick="editImageUrl('${tt.id}')">✏️ 수정</button>
+              <button class="btn-edit-url" data-action="edit-url" data-timetable-id="${tt.id}">✏️ 수정</button>
             </div>
             <div class="url-edit" style="display: none;">
               <input type="text" class="url-input" value="${tt.imageUrl}" />
-              <button class="btn btn-approve" onclick="saveImageUrl('${tt.id}')">💾 저장</button>
-              <button class="btn btn-reject" onclick="cancelEditUrl('${tt.id}')">❌ 취소</button>
+              <button class="btn btn-approve" data-action="save-url" data-timetable-id="${tt.id}">💾 저장</button>
+              <button class="btn btn-reject" data-action="cancel-edit-url" data-timetable-id="${tt.id}">❌ 취소</button>
             </div>
           </div>
         </div>
@@ -467,6 +473,9 @@ async function loadAllTimetables(channelId = null) {
         channelNameSpan.textContent = `${channelInfo.name} (${channelId})`;
       }
     });
+
+    // URL 편집 버튼 이벤트 리스너 추가
+    setupUrlEditListeners(container);
 
   } catch (error) {
     console.error('전체 시간표 로드 오류:', error);
@@ -641,6 +650,32 @@ async function hideTimetableAsAdmin(timetableId) {
     console.error('시간표 숨기기 오류:', error);
     alert('오류: ' + error.message);
   }
+}
+
+// URL 편집 버튼 이벤트 리스너 설정
+function setupUrlEditListeners(container) {
+  // 모든 버튼에 이벤트 위임 사용
+  container.addEventListener('click', (e) => {
+    const button = e.target.closest('[data-action]');
+    if (!button) return;
+
+    const action = button.getAttribute('data-action');
+    const timetableId = button.getAttribute('data-timetable-id');
+
+    if (!timetableId) return;
+
+    switch (action) {
+      case 'edit-url':
+        editImageUrl(timetableId);
+        break;
+      case 'save-url':
+        saveImageUrl(timetableId);
+        break;
+      case 'cancel-edit-url':
+        cancelEditUrl(timetableId);
+        break;
+    }
+  });
 }
 
 // 이미지 모달 표시
