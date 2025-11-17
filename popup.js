@@ -520,10 +520,15 @@ async function openImageModal(imageUrl) {
       action: 'openImageModal',
       imageUrl: imageUrl
     });
+
+    // 팝업 닫기
+    window.close();
   } catch (error) {
     console.error('모달 열기 실패:', error);
     // 실패 시 새 탭으로 열기
     window.open(imageUrl, '_blank');
+    // 팝업 닫기
+    window.close();
   }
 }
 
