@@ -4,6 +4,14 @@ firebase-config.js
 # ZIP 패키지 파일 (빌드 결과물)
 *.zip
 
+# 내부용 문서 (배포 가이드 등)
+STORE_LISTING.md
+WEBSTORE_UPLOAD_GUIDE.md
+WEBSTORE_QUICKSTART.md
+SCREENSHOT_GUIDE.md
+GIT_SETUP.md
+SECURITY_RECOVERY.md
+
 # 개발 환경 파일
 .DS_Store
 Thumbs.db
