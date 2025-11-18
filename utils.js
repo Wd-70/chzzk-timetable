@@ -365,4 +365,53 @@ function getFriendlyErrorMessage(error) {
   return errorMessages[code] || `오류가 발생했습니다: ${error.message}`;
 }
 
+// 채널 정보 캐시
+const channelInfoCache = new Map();
+
+/**
+ * 치지직 API를 통해 채널 정보 가져오기
+ * @param {string} channelId - 채널 ID
+ * @returns {Promise<{id: string, name: string, imageUrl: string|null}>}
+ */
+async function getChannelInfo(channelId) {
+  // 캐시 확인
+  if (channelInfoCache.has(channelId)) {
+    return channelInfoCache.get(channelId);
+  }
+
+  try {
+    const response = await fetch(`https://api.chzzk.naver.com/service/v1/channels/${channelId}`);
+    if (!response.ok) {
+      throw new Error('채널 정보 조회 실패');
+    }
+
+    const data = await response.json();
+    console.log('📺 채널 API 응답:', channelId, data);
+
+    // 응답 구조 확인 및 파싱
+    let channelName = channelId;
+    if (data.content) {
+      channelName = data.content.channelName || data.content.channel?.channelName || channelId;
+    }
+
+    const channelInfo = {
+      id: channelId,
+      name: channelName,
+      imageUrl: data.content?.channelImageUrl || data.content?.channel?.channelImageUrl || null
+    };
+
+    console.log('✅ 파싱된 채널 정보:', channelInfo);
+
+    // 캐시 저장
+    channelInfoCache.set(channelId, channelInfo);
+    return channelInfo;
+  } catch (error) {
+    console.error('채널 정보 조회 오류:', channelId, error);
+    // 실패 시 ID만 반환
+    const fallback = { id: channelId, name: channelId, imageUrl: null };
+    channelInfoCache.set(channelId, fallback);
+    return fallback;
+  }
+}
+
 console.log('✅ Utils loaded');

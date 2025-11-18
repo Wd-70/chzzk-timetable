@@ -6,9 +6,29 @@ let timetables = [];
 let selectedIndex = 0;
 let userVotes = {};
 
+// 현재 날짜/시간 업데이트
+function updateDateTime() {
+  const now = new Date();
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const date = String(now.getDate()).padStart(2, '0');
+  const dayName = days[now.getDay()];
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+
+  const dateTimeText = `${year}-${month}-${date} (${dayName}) ${hours}:${minutes}:${seconds}`;
+  document.getElementById('currentDateTime').textContent = dateTimeText;
+}
+
 // 초기화
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('🚀 Popup 초기화 시작');
+
+  // 현재 시간 표시 시작 (1초마다 업데이트)
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
 
   try {
     // 1. 인증 먼저 처리
@@ -29,27 +49,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 3. 채널 정보 표시
     document.getElementById('channelId').textContent = currentChannelId;
 
-    // content script에서 채널명 가져오기
+    // API를 통해 채널명 가져오기
     try {
-      chrome.tabs.sendMessage(
-        currentTab.id,
-        { action: 'getChannelInfo' },
-        (response) => {
-          // runtime.lastError 체크 (content script가 준비되지 않은 경우)
-          if (chrome.runtime.lastError) {
-            console.log('채널명 가져오기 실패:', chrome.runtime.lastError.message);
-            document.getElementById('channelName').textContent = '알 수 없음';
-            return;
-          }
-
-          if (response && response.channelName) {
-            document.getElementById('channelName').textContent = response.channelName;
-          } else {
-            document.getElementById('channelName').textContent = '알 수 없음';
-          }
-        }
-      );
+      const channelInfo = await getChannelInfo(currentChannelId);
+      document.getElementById('channelName').textContent = channelInfo.name;
     } catch (error) {
+      console.error('채널명 가져오기 오류:', error);
       document.getElementById('channelName').textContent = '알 수 없음';
     }
 
@@ -399,23 +404,31 @@ async function handleReport() {
 
   const reason = prompt(
     '신고 사유를 선택해주세요:\n\n' +
+    '0. 사유 없음 (바로 신고)\n' +
     '1. 잘못된 시간표\n' +
     '2. 부적절한 이미지\n' +
     '3. 광고/스팸\n' +
     '4. 기타 (직접 입력)\n\n' +
-    '번호를 입력하세요 (1-4):'
+    '번호를 입력하세요 (0-4, Enter만 눌러도 신고 가능):'
   );
 
-  if (!reason) return;
+  // 취소 시 종료
+  if (reason === null) return;
 
   let selectedReason;
-  const num = parseInt(reason);
+  const input = reason.trim();
+  const num = parseInt(input);
 
-  if (num >= 1 && num <= 3) {
+  if (input === '' || num === 0) {
+    // 빈 값 또는 0 입력 시 사유 없음
+    selectedReason = '사유 없음';
+  } else if (num >= 1 && num <= 3) {
     selectedReason = reasons[num - 1];
   } else if (num === 4) {
     selectedReason = prompt('신고 사유를 입력해주세요:');
-    if (!selectedReason) return;
+    if (!selectedReason || selectedReason.trim() === '') {
+      selectedReason = '사유 없음';
+    }
   } else {
     alert('잘못된 입력입니다.');
     return;
@@ -437,16 +450,21 @@ async function handleReport() {
 async function showBackupCode() {
   try {
     const code = await getBackupCode();
+    const userId = getCurrentUserId();
+    const userHash = userId ? hashUid(userId) : '알 수 없음';
 
     const message = `
-🔑 계정 백업 코드
+🔑 계정 정보
 
-${code}
+백업 코드 (비밀): ${code}
+사용자 ID (공개): ${userHash}
 
-⚠️ 이 코드를 안전하게 보관하세요!
+⚠️ 백업 코드를 안전하게 보관하세요!
 다른 기기에서 같은 계정을 사용하려면 이 코드가 필요합니다.
 
-복사되었습니다.
+사용자 ID는 다른 사람에게 공개되는 식별자입니다.
+
+백업 코드가 클립보드에 복사되었습니다.
     `.trim();
 
     navigator.clipboard.writeText(code);

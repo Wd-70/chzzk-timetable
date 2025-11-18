@@ -4,50 +4,7 @@
 let currentTab = 'reports';
 let currentReportStatus = 'p'; // pending
 
-// 채널 정보 캐시
-const channelCache = new Map();
-
-// 채널 정보 가져오기
-async function getChannelInfo(channelId) {
-  // 캐시 확인
-  if (channelCache.has(channelId)) {
-    return channelCache.get(channelId);
-  }
-
-  try {
-    const response = await fetch(`https://api.chzzk.naver.com/service/v1/channels/${channelId}`);
-    if (!response.ok) {
-      throw new Error('채널 정보 조회 실패');
-    }
-
-    const data = await response.json();
-    console.log('📺 채널 API 응답:', channelId, data);
-
-    // 응답 구조 확인 및 파싱
-    let channelName = channelId;
-    if (data.content) {
-      channelName = data.content.channelName || data.content.channel?.channelName || channelId;
-    }
-
-    const channelInfo = {
-      id: channelId,
-      name: channelName,
-      imageUrl: data.content?.channelImageUrl || data.content?.channel?.channelImageUrl || null
-    };
-
-    console.log('✅ 파싱된 채널 정보:', channelInfo);
-
-    // 캐시 저장
-    channelCache.set(channelId, channelInfo);
-    return channelInfo;
-  } catch (error) {
-    console.error('채널 정보 조회 오류:', channelId, error);
-    // 실패 시 ID만 반환
-    const fallback = { id: channelId, name: channelId, imageUrl: null };
-    channelCache.set(channelId, fallback);
-    return fallback;
-  }
-}
+// Note: getChannelInfo 함수는 utils.js에서 제공됩니다.
 
 // 초기화
 document.addEventListener('DOMContentLoaded', async () => {
@@ -161,42 +118,80 @@ async function loadReports(status) {
       return;
     }
 
-    container.innerHTML = reports.map(report => `
-      <div class="data-item" data-id="${report.id}">
-        <div class="item-header">
-          <div class="item-info">
-            <div class="item-title">
-              시간표 ID: ${report.timetableId}
+    // 각 신고에 대해 시간표 정보 가져오기
+    const reportsWithTimetables = await Promise.all(
+      reports.map(async (report) => {
+        const timetable = await getTimetableById(report.timetableId);
+        return { ...report, timetable };
+      })
+    );
+
+    container.innerHTML = reportsWithTimetables.map(report => {
+      const tt = report.timetable;
+      const hasImage = tt && tt.imageUrl;
+
+      return `
+        <div class="data-item" data-id="${report.id}" ${tt ? `data-channel-id="${tt.channelId}"` : ''}>
+          <div class="item-header">
+            <div class="item-info">
+              <div class="item-title ${tt ? 'channel-title' : ''}">
+                ${tt ? `채널: <span class="channel-name">불러오는 중...</span>` : `시간표 ID: ${report.timetableId}`}
+              </div>
+              <div class="item-meta">
+                ${tt ? `<span>📅 ${tt.weekStart} ~ ${tt.weekEnd}</span>` : ''}
+                <span>🚨 신고: ${getRelativeTime(report.reportedAt)}</span>
+                <span>👤 신고자: ${report.reportedBy.slice(0, 8)}...</span>
+                <span class="status-badge status-${status === 'p' ? 'pending' : status === 'a' ? 'approved' : 'rejected'}">
+                  ${status === 'p' ? '대기 중' : status === 'a' ? '승인됨' : '거부됨'}
+                </span>
+              </div>
             </div>
-            <div class="item-meta">
-              <span>📅 ${getRelativeTime(report.reportedAt)}</span>
-              <span>👤 ${report.reportedBy.slice(0, 8)}...</span>
-              <span class="status-badge status-${status === 'p' ? 'pending' : status === 'a' ? 'approved' : 'rejected'}">
-                ${status === 'p' ? '대기 중' : status === 'a' ? '승인됨' : '거부됨'}
-              </span>
+            <div class="item-actions">
+              ${status === 'p' ? `
+                <button class="btn btn-approve" data-action="approve-report" data-report-id="${report.id}" data-timetable-id="${report.timetableId}">
+                  ✅ 승인 (삭제)
+                </button>
+                <button class="btn btn-reject" data-action="reject-report" data-report-id="${report.id}">
+                  ❌ 거부
+                </button>
+              ` : ''}
             </div>
           </div>
-          <div class="item-actions">
-            ${status === 'p' ? `
-              <button class="btn btn-approve" onclick="approveReport('${report.id}', '${report.timetableId}')">
-                ✅ 승인 (삭제)
-              </button>
-              <button class="btn btn-reject" onclick="rejectReport('${report.id}')">
-                ❌ 거부
-              </button>
-            ` : ''}
-            <button class="btn btn-view" onclick="viewTimetable('${report.timetableId}')">
-              👁️ 시간표 보기
-            </button>
+          <div class="item-content">
+            ${hasImage ? `<img src="${tt.imageUrl}" alt="시간표" class="item-image" data-image-url="${tt.imageUrl}" />` : '<p style="color: #999;">시간표가 삭제되었거나 찾을 수 없습니다.</p>'}
+            <div class="item-reason">
+              <strong>신고 사유:</strong> ${report.reason}
+            </div>
           </div>
         </div>
-        <div class="item-content">
-          <div class="item-reason">
-            <strong>신고 사유:</strong> ${report.reason}
-          </div>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+
+    // 이미지 클릭 이벤트 추가
+    container.querySelectorAll('.item-image').forEach(img => {
+      img.addEventListener('click', () => {
+        showImageModal(img.getAttribute('data-image-url'));
+      });
+      img.style.cursor = 'pointer';
+    });
+
+    // 채널 정보 가져오기
+    const channelIds = new Set();
+    reportsWithTimetables.forEach(report => {
+      if (report.timetable) {
+        channelIds.add(report.timetable.channelId);
+      }
+    });
+
+    for (const channelId of channelIds) {
+      const channelInfo = await getChannelInfo(channelId);
+      container.querySelectorAll(`[data-channel-id="${channelId}"] .channel-name`).forEach(el => {
+        el.textContent = channelInfo.name;
+      });
+    }
+
+    // 버튼 이벤트 리스너 추가
+    setupActionListeners(container);
 
   } catch (error) {
     console.error('신고 로드 오류:', error);
@@ -242,10 +237,10 @@ async function loadRemovedTimetables() {
             </div>
           </div>
           <div class="item-actions">
-            <button class="btn btn-restore" onclick="restoreTimetable('${tt.id}')">
+            <button class="btn btn-restore" data-action="restore-timetable" data-timetable-id="${tt.id}">
               ♻️ 복구 (내 ID로)
             </button>
-            <button class="btn btn-delete" onclick="permanentlyDeleteTimetable('${tt.id}')">
+            <button class="btn btn-delete" data-action="permanently-delete" data-timetable-id="${tt.id}">
               🗑️ 영구 삭제
             </button>
           </div>
@@ -335,10 +330,10 @@ async function loadHiddenTimetables() {
             </div>
           </div>
           <div class="item-actions">
-            <button class="btn btn-restore" onclick="unhideTimetable('${tt.id}')">
+            <button class="btn btn-restore" data-action="unhide-timetable" data-timetable-id="${tt.id}">
               👁️ 숨김 해제
             </button>
-            <button class="btn btn-delete" onclick="deleteTimetableAsAdmin('${tt.id}')">
+            <button class="btn btn-delete" data-action="delete-timetable" data-timetable-id="${tt.id}">
               🗑️ 삭제
             </button>
           </div>
@@ -429,10 +424,10 @@ async function loadAllTimetables(channelId = null) {
             </div>
           </div>
           <div class="item-actions">
-            <button class="btn btn-delete" onclick="deleteTimetableAsAdmin('${tt.id}')">
+            <button class="btn btn-delete" data-action="delete-timetable" data-timetable-id="${tt.id}">
               🗑️ 삭제
             </button>
-            <button class="btn btn-view" onclick="hideTimetableAsAdmin('${tt.id}')">
+            <button class="btn btn-view" data-action="hide-timetable" data-timetable-id="${tt.id}">
               👁️ 숨기기
             </button>
           </div>
@@ -653,7 +648,7 @@ async function hideTimetableAsAdmin(timetableId) {
 }
 
 // URL 편집 버튼 이벤트 리스너 설정
-function setupUrlEditListeners(container) {
+function setupActionListeners(container) {
   // 모든 버튼에 이벤트 위임 사용
   container.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
@@ -661,21 +656,76 @@ function setupUrlEditListeners(container) {
 
     const action = button.getAttribute('data-action');
     const timetableId = button.getAttribute('data-timetable-id');
-
-    if (!timetableId) return;
+    const reportId = button.getAttribute('data-report-id');
 
     switch (action) {
+      // 신고 관련
+      case 'approve-report':
+        if (reportId && timetableId) {
+          approveReport(reportId, timetableId);
+        }
+        break;
+      case 'reject-report':
+        if (reportId) {
+          rejectReport(reportId);
+        }
+        break;
+      case 'view-timetable':
+        if (timetableId) {
+          viewTimetable(timetableId);
+        }
+        break;
+
+      // 시간표 관리
+      case 'restore-timetable':
+        if (timetableId) {
+          restoreTimetable(timetableId);
+        }
+        break;
+      case 'permanently-delete':
+        if (timetableId) {
+          permanentlyDeleteTimetable(timetableId);
+        }
+        break;
+      case 'unhide-timetable':
+        if (timetableId) {
+          unhideTimetable(timetableId);
+        }
+        break;
+      case 'delete-timetable':
+        if (timetableId) {
+          deleteTimetableAsAdmin(timetableId);
+        }
+        break;
+      case 'hide-timetable':
+        if (timetableId) {
+          hideTimetableAsAdmin(timetableId);
+        }
+        break;
+
+      // URL 편집
       case 'edit-url':
-        editImageUrl(timetableId);
+        if (timetableId) {
+          editImageUrl(timetableId);
+        }
         break;
       case 'save-url':
-        saveImageUrl(timetableId);
+        if (timetableId) {
+          saveImageUrl(timetableId);
+        }
         break;
       case 'cancel-edit-url':
-        cancelEditUrl(timetableId);
+        if (timetableId) {
+          cancelEditUrl(timetableId);
+        }
         break;
     }
   });
+}
+
+// 하위 호환성을 위한 별칭
+function setupUrlEditListeners(container) {
+  setupActionListeners(container);
 }
 
 // 이미지 모달 표시
