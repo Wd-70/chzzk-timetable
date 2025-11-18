@@ -376,6 +376,195 @@
         align-items: center;
         gap: 8px;
       }
+
+      /* 모달 스타일 */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+      }
+
+      .modal-content {
+        position: relative;
+        background: #2a2a2a;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #444;
+      }
+
+      .modal-header h2 {
+        margin: 0;
+        font-size: 18px;
+        color: #e0e0e0;
+      }
+
+      .modal-close-btn {
+        background: transparent;
+        border: none;
+        font-size: 24px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+
+      .modal-close-btn:hover {
+        background: #3a3a3a;
+        color: #e0e0e0;
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      .account-id-section {
+        margin-bottom: 20px;
+      }
+
+      .account-id-section label {
+        display: block;
+        font-size: 12px;
+        color: #999;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+
+      .account-id-display {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .account-id-display code {
+        flex: 1;
+        background: #1a1a1a;
+        padding: 10px 12px;
+        border-radius: 6px;
+        color: #00bcd4;
+        font-size: 13px;
+        word-break: break-all;
+        border: 1px solid #444;
+      }
+
+      .btn-small {
+        padding: 8px 12px;
+        font-size: 12px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+
+      .btn-copy {
+        background: #00bcd4;
+        color: white;
+      }
+
+      .btn-copy:hover {
+        background: #0097a7;
+      }
+
+      .account-info {
+        background: #1a1a1a;
+        padding: 12px;
+        border-radius: 6px;
+        border-left: 3px solid #00bcd4;
+        margin-bottom: 20px;
+      }
+
+      .account-info p {
+        margin: 6px 0;
+        font-size: 13px;
+        color: #e0e0e0;
+        line-height: 1.5;
+      }
+
+      .account-notes {
+        background: #1a1a1a;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+
+      .account-notes h4 {
+        margin: 0 0 10px 0;
+        font-size: 13px;
+        color: #e0e0e0;
+      }
+
+      .account-notes ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .account-notes li {
+        font-size: 12px;
+        color: #999;
+        line-height: 1.6;
+        margin-bottom: 6px;
+      }
+
+      .account-actions {
+        text-align: center;
+        padding-top: 15px;
+        border-top: 1px solid #444;
+      }
+
+      .btn-danger {
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        transition: all 0.2s;
+      }
+
+      .btn-danger:hover {
+        background: #d32f2f;
+      }
+
+      .warning-text {
+        font-size: 11px;
+        color: #ff9800;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
@@ -488,7 +677,7 @@
       <div class="footer" style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #222;">
         <div class="footer-links">
           <p style="font-size: 12px; color: #999; text-align: center; margin: 0;">
-            <a href="#" id="backupCodeLink" style="color: #00bcd4;">백업 코드 보기</a>
+            <a href="#" id="backupCodeLink" style="color: #00bcd4;">내 계정 ID</a>
             <span id="adminLinkSeparator" style="display: none; margin: 0 8px;">•</span>
             <a href="#" id="adminPageLink" style="color: #03c75a; display: none;">🔧 관리자 페이지</a>
           </p>
@@ -512,6 +701,49 @@
 
     <!-- 관리자 설정 -->
     <script src="admin-config.js"></script>
+
+    <!-- 계정 ID 모달 -->
+    <div id="accountModal" class="modal" style="display: none;">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🔑 내 계정 ID</h2>
+          <button id="closeAccountModal" class="modal-close-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="account-id-section">
+            <label>계정 ID</label>
+            <div class="account-id-display">
+              <code id="accountIdText">로딩 중...</code>
+              <button id="copyAccountIdBtn" class="btn-small btn-copy">📋 복사</button>
+            </div>
+          </div>
+
+          <div class="account-info">
+            <p>ℹ️ 이 ID는 업로드한 시간표에 표시되는 식별자입니다.</p>
+            <p>⚠️ 이 ID만으로는 계정을 복원할 수 없으므로 노출되어도 안전합니다.</p>
+          </div>
+
+          <div class="account-notes">
+            <h4>참고 사항</h4>
+            <ul>
+              <li>각 기기마다 별도의 계정 ID가 자동으로 생성됩니다</li>
+              <li>같은 계정을 여러 기기에서 사용하는 기능은 지원하지 않습니다</li>
+              <li>브라우저 데이터 삭제 시 계정이 초기화되며 복구할 수 없습니다</li>
+            </ul>
+          </div>
+
+          <div class="account-actions">
+            <button id="createNewAccountBtn" class="btn-danger">
+              🔄 새 계정 생성
+            </button>
+            <p class="warning-text">
+              ⚠️ 새 계정을 생성하면 현재 계정으로 돌아갈 수 없습니다!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- 앱 로직 -->
     <script src="popup.js"></script>

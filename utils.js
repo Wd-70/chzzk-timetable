@@ -176,8 +176,7 @@ function expandTimetable(doc) {
     weekEnd: compactToReadable(data.we),
     weekStartCompact: data.ws,
     weekEndCompact: data.we,
-    uploadedBy: data.uid, // 비밀키 (권한 체크용, UI에 절대 표시 금지!)
-    uploadedByHash: hashUid(data.uid), // 공개 ID (UI 표시용)
+    uploadedBy: data.uid, // 업로더 ID (권한 체크 및 표시용)
     uploadedAt: new Date(data.at),
     likes: data.l || 0,
     dislikes: data.d || 0,

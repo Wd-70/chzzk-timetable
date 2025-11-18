@@ -1,7 +1,7 @@
 # 개인정보 처리방침 (Privacy Policy)
 
-**최종 수정일:** 2025년 3월 16일
-**버전:** 1.0.0
+**최종 수정일:** 2025년 11월 18일
+**버전:** 1.1.0
 
 ---
 
@@ -48,8 +48,11 @@
 사용자는 다음과 같은 권리를 가집니다:
 
 - **삭제권**: 본인이 업로드한 시간표를 언제든 삭제할 수 있습니다
-- **접근권**: 백업 코드를 통해 본인의 계정 정보에 접근할 수 있습니다
+- **접근권**: 확장 프로그램에서 본인의 계정 ID를 확인할 수 있습니다
 - **철회권**: 확장 프로그램을 제거하여 서비스 사용을 중단할 수 있습니다
+
+**⚠️ 계정 ID 안전성:**
+각 기기마다 고유한 익명 계정 ID가 자동으로 생성됩니다. 이 ID는 다른 사람에게 노출되어도 안전하며, 계정 복원이나 다른 기기에서의 로그인에 사용할 수 없습니다. 브라우저 데이터 삭제 시 계정이 초기화되며 복구할 수 없습니다.
 
 ### 6. 데이터 보관 기간
 
@@ -134,8 +137,11 @@ Collected information is used only for:
 Users have the following rights:
 
 - **Right to Delete**: Delete your uploaded timetables at any time
-- **Right to Access**: Access your account information through backup codes
+- **Right to Access**: View your account ID in the extension
 - **Right to Withdraw**: Stop using the service by removing the extension
+
+**⚠️ Account ID Safety:**
+A unique anonymous account ID is automatically generated for each device. This ID is safe to expose to others and cannot be used for account restoration or logging in from other devices. If you delete your browser data, your account will be reset and cannot be recovered.
 
 ### 6. Data Retention Period
 

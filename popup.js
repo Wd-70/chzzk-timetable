@@ -134,8 +134,8 @@ function displayTimetable(index) {
   const userVote = userVotes[timetable.id];
   updateVoteButtons(userVote);
 
-  // 업로더 정보 (해시만 표시)
-  document.getElementById('uploaderInfo').textContent = `업로더: ${timetable.uploadedByHash}`;
+  // 업로더 정보 (계정 ID 표시)
+  document.getElementById('uploaderInfo').textContent = `업로더: ${timetable.uploadedBy.slice(0, 8)}...`;
 
   // 삭제 버튼 표시 (자신이 등록한 것만)
   const deleteBtn = document.getElementById('deleteBtn');
@@ -249,7 +249,7 @@ function setupEventListeners() {
     await handleDelete();
   });
 
-  // 백업 코드
+  // 계정 ID
   document.getElementById('backupCodeLink').addEventListener('click', async (e) => {
     e.preventDefault();
     await showBackupCode();
@@ -280,6 +280,26 @@ function setupEventListeners() {
   document.getElementById('adminPageLink').addEventListener('click', (e) => {
     e.preventDefault();
     chrome.runtime.openOptionsPage();
+  });
+
+  // 계정 모달 관련
+  document.getElementById('closeAccountModal').addEventListener('click', () => {
+    closeAccountModal();
+  });
+
+  // 모달 오버레이 클릭 시 닫기
+  document.querySelector('.modal-overlay').addEventListener('click', () => {
+    closeAccountModal();
+  });
+
+  // 계정 ID 복사 버튼
+  document.getElementById('copyAccountIdBtn').addEventListener('click', () => {
+    copyAccountId();
+  });
+
+  // 새 계정 생성 버튼
+  document.getElementById('createNewAccountBtn').addEventListener('click', async () => {
+    await createNewAccount();
   });
 }
 
@@ -446,33 +466,95 @@ async function handleReport() {
   }
 }
 
-// 백업 코드 표시
+// 계정 ID 모달 표시
 async function showBackupCode() {
   try {
-    const code = await getBackupCode();
     const userId = getCurrentUserId();
-    const userHash = userId ? hashUid(userId) : '알 수 없음';
 
-    const message = `
-🔑 계정 정보
+    if (!userId) {
+      alert('❌ 계정 정보를 가져올 수 없습니다.');
+      return;
+    }
 
-백업 코드 (비밀): ${code}
-사용자 ID (공개): ${userHash}
+    // 모달에 계정 ID 표시
+    document.getElementById('accountIdText').textContent = userId;
 
-⚠️ 백업 코드를 안전하게 보관하세요!
-다른 기기에서 같은 계정을 사용하려면 이 코드가 필요합니다.
-
-사용자 ID는 다른 사람에게 공개되는 식별자입니다.
-
-백업 코드가 클립보드에 복사되었습니다.
-    `.trim();
-
-    navigator.clipboard.writeText(code);
-    alert(message);
+    // 모달 표시
+    document.getElementById('accountModal').style.display = 'flex';
 
   } catch (error) {
-    console.error('백업 코드 오류:', error);
+    console.error('계정 ID 조회 오류:', error);
     alert(getFriendlyErrorMessage(error));
+  }
+}
+
+// 계정 ID 모달 닫기
+function closeAccountModal() {
+  document.getElementById('accountModal').style.display = 'none';
+}
+
+// 계정 ID 복사
+function copyAccountId() {
+  const accountId = document.getElementById('accountIdText').textContent;
+
+  navigator.clipboard.writeText(accountId).then(() => {
+    const copyBtn = document.getElementById('copyAccountIdBtn');
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = '✓ 복사됨!';
+    copyBtn.style.background = '#4CAF50';
+
+    setTimeout(() => {
+      copyBtn.textContent = originalText;
+      copyBtn.style.background = '';
+    }, 2000);
+  }).catch(error => {
+    console.error('복사 실패:', error);
+    alert('클립보드 복사에 실패했습니다.');
+  });
+}
+
+// 새 계정 생성
+async function createNewAccount() {
+  const confirmed = confirm(
+    '⚠️ 정말로 새 계정을 생성하시겠습니까?\n\n' +
+    '현재 계정으로 업로드한 시간표는 더 이상 삭제하거나 수정할 수 없게 됩니다.\n' +
+    '현재 계정으로 돌아갈 수 있는 방법이 없습니다.\n\n' +
+    '계속하시겠습니까?'
+  );
+
+  if (!confirmed) return;
+
+  const doubleConfirm = confirm(
+    '🚨 최종 확인\n\n' +
+    '정말로 새 계정을 생성하시겠습니까?\n' +
+    '이 작업은 취소할 수 없습니다!'
+  );
+
+  if (!doubleConfirm) return;
+
+  try {
+    console.log('🔄 새 계정 생성 시작...');
+
+    // 현재 계정에서 로그아웃
+    await auth.signOut();
+    console.log('✅ 기존 계정 로그아웃');
+
+    // 새 익명 계정 생성
+    await auth.signInAnonymously();
+    console.log('✅ 새 계정 생성 완료');
+
+    // 모달 닫기
+    closeAccountModal();
+
+    // 성공 메시지
+    alert('✅ 새 계정이 생성되었습니다!\n\n페이지를 새로고침합니다.');
+
+    // 페이지 새로고침
+    location.reload();
+
+  } catch (error) {
+    console.error('❌ 계정 생성 실패:', error);
+    alert('계정 생성에 실패했습니다:\n' + error.message);
   }
 }
 

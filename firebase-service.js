@@ -60,9 +60,9 @@ async function getTimetables(channelId, weekStartCompact) {
   const timetables = [];
   snapshot.forEach(doc => {
     const tt = expandTimetable(doc);
-    // 보안: 다른 사람의 uid 노출 방지
+    // 본인 업로드 여부 확인
     tt.isOwner = tt.uploadedBy === currentUserId;
-    delete tt.uploadedBy; // uid 완전 제거!
+    // uploadedBy는 공개 정보로 유지 (복원 불가능하므로 노출되어도 안전)
     timetables.push(tt);
   });
 
@@ -295,15 +295,6 @@ async function reportTimetable(timetableId, reason) {
  */
 function getCurrentUserId() {
   return auth.currentUser?.uid || null;
-}
-
-/**
- * 백업 코드 (UID) 가져오기
- * @returns {Promise<string>}
- */
-async function getBackupCode() {
-  await ensureAuthenticated();
-  return auth.currentUser.uid;
 }
 
 // ==================== 관리자 전용 함수 ====================
